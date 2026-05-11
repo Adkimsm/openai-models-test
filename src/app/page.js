@@ -59,7 +59,7 @@ export default function Home() {
     }
   }
 
-  async function handleTest({ concurrency, timeout }) {
+  async function handleTest({ concurrency, timeout, testPrompt }) {
     if (!selectedSite || enabledModels.length === 0) return
 
     setTesting(true)
@@ -95,6 +95,7 @@ export default function Home() {
             timeout,
             concurrency: batch.length,
             chatEndpoint: selectedSite.chatEndpoint,
+            testPrompt,
           }),
         })
 

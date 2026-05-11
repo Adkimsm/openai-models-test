@@ -40,6 +40,11 @@ export default function ResultsTable({ results, siteName }) {
         const bVal = b.success ? b.latency : Infinity
         return sortDir === "asc" ? aVal - bVal : bVal - aVal
       }
+      if (sortField === "speed") {
+        const aVal = a.success ? (a.speed || 0) : -Infinity
+        const bVal = b.success ? (b.speed || 0) : -Infinity
+        return sortDir === "asc" ? aVal - bVal : bVal - aVal
+      }
       if (sortField === "model") {
         return sortDir === "asc"
           ? a.model.localeCompare(b.model)
@@ -142,6 +147,13 @@ export default function ResultsTable({ results, siteName }) {
                   延迟 (ms)
                   <SortIcon field="latency" />
                 </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => toggleSort("speed")}
+                >
+                  速度
+                  <SortIcon field="speed" />
+                </TableHead>
                 <TableHead>响应</TableHead>
               </TableRow>
             </TableHeader>
@@ -161,6 +173,15 @@ export default function ResultsTable({ results, siteName }) {
                   <TableCell className="text-gray-12">
                     {result.success ? (
                       <span className="font-mono">{result.latency}</span>
+                    ) : (
+                      <span className="text-gray-8">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-gray-12">
+                    {result.success && result.speed ? (
+                      <span className="font-mono">
+                        {result.speed} <span className="text-gray-9 text-xs">{result.speedUnit}</span>
+                      </span>
                     ) : (
                       <span className="text-gray-8">-</span>
                     )}
@@ -192,8 +213,11 @@ export default function ResultsTable({ results, siteName }) {
                 </Badge>
               </div>
               {result.success && (
-                <div className="text-xs text-gray-9">
-                  延迟: <span className="font-mono">{result.latency}ms</span>
+                <div className="text-xs text-gray-9 space-x-3">
+                  <span>延迟: <span className="font-mono">{result.latency}ms</span></span>
+                  {result.speed > 0 && (
+                    <span>速度: <span className="font-mono">{result.speed} {result.speedUnit}</span></span>
+                  )}
                 </div>
               )}
               <div className="text-xs text-gray-9 truncate">

@@ -1,6 +1,6 @@
 import pLimit from "p-limit"
 
-async function testModel(apiBase, apiKey, model, timeout, chatEndpoint = "/v1/chat/completions") {
+async function testModel(apiBase, apiKey, model, timeout, chatEndpoint = "/v1/chat/completions", testPrompt = "hi") {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeout)
 
@@ -17,7 +17,7 @@ async function testModel(apiBase, apiKey, model, timeout, chatEndpoint = "/v1/ch
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: "user", content: "hi" }],
+        messages: [{ role: "user", content: testPrompt }],
         max_tokens: 10,
       }),
       signal: controller.signal,
@@ -37,10 +37,23 @@ async function testModel(apiBase, apiKey, model, timeout, chatEndpoint = "/v1/ch
 
     const data = await response.json()
     const content = data.choices?.[0]?.message?.content || ""
+    const latencySec = latency / 1000
+
+    let speed = 0
+    let speedUnit = "chars/s"
+    if (data.usage?.completion_tokens && latencySec > 0) {
+      speed = data.usage.completion_tokens / latencySec
+      speedUnit = "tokens/s"
+    } else if (content.length > 0 && latencySec > 0) {
+      speed = content.length / latencySec
+      speedUnit = "chars/s"
+    }
 
     return {
       success: true,
       latency,
+      speed: Math.round(speed * 10) / 10,
+      speedUnit,
       response: content.slice(0, 200),
     }
   } catch (error) {
@@ -54,7 +67,7 @@ async function testModel(apiBase, apiKey, model, timeout, chatEndpoint = "/v1/ch
 
 export async function POST(request) {
   try {
-    const { apiBase, apiKey, models, timeout = 20000, concurrency = 50, chatEndpoint = "/v1/chat/completions" } =
+    const { apiBase, apiKey, models, timeout = 20000, concurrency = 50, chatEndpoint = "/v1/chat/completions", testPrompt = "hi" } =
       await request.json()
 
     if (!apiBase || !apiKey || !models?.length) {
@@ -68,7 +81,7 @@ export async function POST(request) {
 
     const results = await Promise.allSettled(
       models.map((model) =>
-        limit(() => testModel(apiBase, apiKey, model, timeout, chatEndpoint))
+        limit(() => testModel(apiBase, apiKey, model, timeout, chatEndpoint, testPrompt))
       )
     )
 

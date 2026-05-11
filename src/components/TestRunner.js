@@ -26,6 +26,7 @@ export default function TestRunner({
 }) {
   const [concurrency, setConcurrency] = useState(50)
   const [timeout, setTimeout_] = useState(20000)
+  const [testPrompt, setTestPrompt] = useState("hi")
   const [showSettings, setShowSettings] = useState(false)
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function TestRunner({
         const settings = JSON.parse(saved)
         if (settings.concurrency) setConcurrency(settings.concurrency)
         if (settings.timeout) setTimeout_(settings.timeout)
+        if (settings.testPrompt) setTestPrompt(settings.testPrompt)
       } catch {
         // use defaults
       }
@@ -44,12 +46,12 @@ export default function TestRunner({
   useEffect(() => {
     localStorage.setItem(
       SETTINGS_KEY,
-      JSON.stringify({ concurrency, timeout })
+      JSON.stringify({ concurrency, timeout, testPrompt })
     )
-  }, [concurrency, timeout])
+  }, [concurrency, timeout, testPrompt])
 
   function handleTest() {
-    onTest({ concurrency, timeout })
+    onTest({ concurrency, timeout, testPrompt })
   }
 
   const progressPercent =
@@ -139,6 +141,18 @@ export default function TestRunner({
                   ))}
                 </div>
               </div>
+            </div>
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="testPrompt" className="text-xs">
+                测试提示词
+              </Label>
+              <Input
+                id="testPrompt"
+                placeholder="hi"
+                value={testPrompt}
+                onChange={(e) => setTestPrompt(e.target.value)}
+                className="h-8"
+              />
             </div>
           </div>
         )}
