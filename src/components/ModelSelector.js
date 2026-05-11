@@ -13,8 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Download, Search, CheckSquare, Square } from "lucide-react"
-
-const DISABLED_KEY = "ai-test-disabled-models"
+import { getDisabledModels, saveDisabledModels } from "@/lib/db"
 
 export default function ModelSelector({
   selectedSite,
@@ -29,19 +28,25 @@ export default function ModelSelector({
   const [disabledModels, setDisabledModels] = useState({})
 
   useEffect(() => {
-    const saved = localStorage.getItem(DISABLED_KEY)
-    if (saved) {
-      try {
-        setDisabledModels(JSON.parse(saved))
-      } catch {
-        setDisabledModels({})
+    const loadDisabled = async () => {
+      const saved = await getDisabledModels(selectedSite?.apiBase)
+      if (selectedSite?.apiBase && saved) {
+        setDisabledModels((prev) => ({
+          ...prev,
+          [selectedSite.apiBase]: saved,
+        }))
       }
     }
-  }, [])
+    if (selectedSite) {
+      loadDisabled()
+    }
+  }, [selectedSite])
 
   function saveDisabled(newDisabled) {
     setDisabledModels(newDisabled)
-    localStorage.setItem(DISABLED_KEY, JSON.stringify(newDisabled))
+    if (selectedSite?.apiBase) {
+      saveDisabledModels(selectedSite.apiBase, newDisabled[selectedSite.apiBase] || [])
+    }
   }
 
   function toggleModel(model) {

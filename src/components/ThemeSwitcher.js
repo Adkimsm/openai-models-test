@@ -3,26 +3,28 @@
 import { useState, useEffect } from "react"
 import { Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getSetting, setSetting } from "@/lib/db"
 
 export default function ThemeSwitcher() {
   const [theme, setTheme] = useState("light")
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme")
-    if (saved) {
-      setTheme(saved)
-      document.documentElement.classList.toggle("dark", saved === "dark")
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      setTheme(prefersDark ? "dark" : "light")
-      document.documentElement.classList.toggle("dark", prefersDark)
-    }
+    getSetting("theme").then((saved) => {
+      if (saved) {
+        setTheme(saved)
+        document.documentElement.classList.toggle("dark", saved === "dark")
+      } else {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+        setTheme(prefersDark ? "dark" : "light")
+        document.documentElement.classList.toggle("dark", prefersDark)
+      }
+    })
   }, [])
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark"
     setTheme(next)
-    localStorage.setItem("theme", next)
+    setSetting("theme", next)
     document.documentElement.classList.toggle("dark", next === "dark")
   }
 

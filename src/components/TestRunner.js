@@ -13,8 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Play, Square, Settings2 } from "lucide-react"
-
-const SETTINGS_KEY = "ai-test-settings"
+import { getSetting, setSetting } from "@/lib/db"
 
 export default function TestRunner({
   selectedSite,
@@ -30,24 +29,21 @@ export default function TestRunner({
   const [showSettings, setShowSettings] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem(SETTINGS_KEY)
-    if (saved) {
-      try {
-        const settings = JSON.parse(saved)
-        if (settings.concurrency) setConcurrency(settings.concurrency)
-        if (settings.timeout) setTimeout_(settings.timeout)
-        if (settings.testPrompt) setTestPrompt(settings.testPrompt)
-      } catch {
-        // use defaults
-      }
-    }
+    Promise.all([
+      getSetting("concurrency"),
+      getSetting("timeout"),
+      getSetting("testPrompt"),
+    ]).then(([savedConcurrency, savedTimeout, savedPrompt]) => {
+      if (savedConcurrency) setConcurrency(savedConcurrency)
+      if (savedTimeout) setTimeout_(savedTimeout)
+      if (savedPrompt) setTestPrompt(savedPrompt)
+    })
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(
-      SETTINGS_KEY,
-      JSON.stringify({ concurrency, timeout, testPrompt })
-    )
+    setSetting("concurrency", concurrency)
+    setSetting("timeout", timeout)
+    setSetting("testPrompt", testPrompt)
   }, [concurrency, timeout, testPrompt])
 
   function handleTest() {

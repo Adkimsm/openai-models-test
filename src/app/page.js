@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import SiteManager from "@/components/SiteManager"
 import ModelSelector from "@/components/ModelSelector"
 import TestRunner from "@/components/TestRunner"
@@ -8,6 +8,7 @@ import ResultsTable from "@/components/ResultsTable"
 import ExportButton from "@/components/ExportButton"
 import Footer from "@/components/Footer"
 import ThemeSwitcher from "@/components/ThemeSwitcher"
+import { getResults, saveResults, getModels, saveModels } from "@/lib/db"
 
 export default function Home() {
   const [selectedSite, setSelectedSite] = useState(null)
@@ -23,6 +24,24 @@ export default function Home() {
     failed: 0,
   })
   const abortRef = useRef(false)
+
+  useEffect(() => {
+    if (!selectedSite) return
+    const apiBase = selectedSite.apiBase
+
+    getResults(apiBase).then((cached) => {
+      if (cached && cached.length > 0) {
+        setResults(cached)
+      }
+    })
+
+    getModels(apiBase).then((cached) => {
+      if (cached && cached.length > 0) {
+        setModels(cached)
+        setEnabledModels(cached)
+      }
+    })
+  }, [selectedSite])
 
   async function handleFetchModels() {
     if (!selectedSite) return
@@ -52,6 +71,7 @@ export default function Home() {
 
       setModels(data.models)
       setEnabledModels(data.models)
+      saveModels(selectedSite.apiBase, data.models)
     } catch (error) {
       alert(`网络错误: ${error.message}`)
     } finally {
@@ -124,6 +144,9 @@ export default function Home() {
     }
 
     setTesting(false)
+    if (allResults.length > 0 && selectedSite) {
+      saveResults(selectedSite.apiBase, allResults)
+    }
   }
 
   function handleCancel() {

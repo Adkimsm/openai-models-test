@@ -20,12 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Plus, Pencil, Trash2, Globe, Key, Settings2 } from "lucide-react"
-
-const STORAGE_KEY = "ai-test-sites"
-
-function generateId() {
-  return Math.random().toString(36).substring(2, 15)
-}
+import { getSites, saveSite, deleteSite } from "@/lib/db"
 
 export default function SiteManager({ selectedSite, onSelectSite }) {
   const [sites, setSites] = useState([])
@@ -34,19 +29,14 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
   const [formData, setFormData] = useState({ name: "", apiBase: "", apiKey: "", modelsEndpoint: "/v1/models", chatEndpoint: "/v1/chat/completions" })
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        setSites(JSON.parse(saved))
-      } catch {
-        setSites([])
-      }
-    }
+    getSites().then((saved) => {
+      if (saved) setSites(saved)
+    })
   }, [])
 
   function saveSites(newSites) {
     setSites(newSites)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSites))
+    newSites.forEach((site) => saveSite(site))
   }
 
   function handleAdd() {
@@ -69,7 +59,8 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
 
   function handleDelete(siteId) {
     const newSites = sites.filter((s) => s.id !== siteId)
-    saveSites(newSites)
+    setSites(newSites)
+    deleteSite(siteId)
     if (selectedSite?.id === siteId) {
       onSelectSite(null)
     }
@@ -79,17 +70,20 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
     if (!formData.name || !formData.apiBase || !formData.apiKey) return
 
     if (editingSite) {
+      const updated = { ...editingSite, ...formData }
       const newSites = sites.map((s) =>
-        s.id === editingSite.id ? { ...s, ...formData } : s
+        s.id === editingSite.id ? updated : s
       )
-      saveSites(newSites)
+      setSites(newSites)
+      saveSite(updated)
       if (selectedSite?.id === editingSite.id) {
-        onSelectSite({ ...selectedSite, ...formData })
+        onSelectSite(updated)
       }
     } else {
-      const newSite = { id: generateId(), ...formData }
+      const newSite = { id: crypto.randomUUID(), ...formData }
       const newSites = [...sites, newSite]
-      saveSites(newSites)
+      setSites(newSites)
+      saveSite(newSite)
     }
 
     setDialogOpen(false)
