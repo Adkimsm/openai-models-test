@@ -6,6 +6,7 @@ import ModelSelector from "@/components/ModelSelector"
 import TestRunner from "@/components/TestRunner"
 import ResultsTable from "@/components/ResultsTable"
 import ExportButton from "@/components/ExportButton"
+import Footer from "@/components/Footer"
 
 export default function Home() {
   const [selectedSite, setSelectedSite] = useState(null)
@@ -186,6 +187,8 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   )
 }
