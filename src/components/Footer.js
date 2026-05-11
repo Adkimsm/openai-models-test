@@ -3,7 +3,11 @@
 export default function Footer() {
   return (
     <footer className="border-t border-gray-4 mt-auto">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6 space-y-4">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-9">
+          <span>所有站点配置与模型数据仅保存在浏览器本地，不会存储在任何服务器上。</span>
+          <span>测试会消耗 API Token，用于发送真实请求以验证模型可用性。</span>
+        </div>
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="text-sm text-gray-9">
             © {new Date().getFullYear()} AI 模型可用性测试
