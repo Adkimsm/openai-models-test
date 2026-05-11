@@ -39,6 +39,7 @@ export default function Home() {
         body: JSON.stringify({
           apiBase: selectedSite.apiBase,
           apiKey: selectedSite.apiKey,
+          modelsEndpoint: selectedSite.modelsEndpoint,
         }),
       })
 
@@ -93,6 +94,7 @@ export default function Home() {
             models: batch,
             timeout,
             concurrency: batch.length,
+            chatEndpoint: selectedSite.chatEndpoint,
           }),
         })
 

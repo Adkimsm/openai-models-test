@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Plus, Pencil, Trash2, Globe, Key } from "lucide-react"
+import { Plus, Pencil, Trash2, Globe, Key, Settings2 } from "lucide-react"
 
 const STORAGE_KEY = "ai-test-sites"
 
@@ -31,7 +31,7 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
   const [sites, setSites] = useState([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingSite, setEditingSite] = useState(null)
-  const [formData, setFormData] = useState({ name: "", apiBase: "", apiKey: "" })
+  const [formData, setFormData] = useState({ name: "", apiBase: "", apiKey: "", modelsEndpoint: "/v1/models", chatEndpoint: "/v1/chat/completions" })
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -51,13 +51,19 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
 
   function handleAdd() {
     setEditingSite(null)
-    setFormData({ name: "", apiBase: "", apiKey: "" })
+    setFormData({ name: "", apiBase: "", apiKey: "", modelsEndpoint: "/v1/models", chatEndpoint: "/v1/chat/completions" })
     setDialogOpen(true)
   }
 
   function handleEdit(site) {
     setEditingSite(site)
-    setFormData({ name: site.name, apiBase: site.apiBase, apiKey: site.apiKey })
+    setFormData({
+      name: site.name,
+      apiBase: site.apiBase,
+      apiKey: site.apiKey,
+      modelsEndpoint: site.modelsEndpoint || "/v1/models",
+      chatEndpoint: site.chatEndpoint || "/v1/chat/completions",
+    })
     setDialogOpen(true)
   }
 
@@ -209,6 +215,49 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
                 }
               />
             </div>
+            <details className="group">
+              <summary className="flex items-center gap-1.5 text-xs text-gray-9 cursor-pointer select-none hover:text-gray-12 transition-colors">
+                <Settings2 className="h-3 w-3" />
+                高级设置
+                <svg
+                  className="h-3 w-3 transition-transform group-open:rotate-90"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </summary>
+              <div className="mt-3 space-y-3 pl-4 border-l border-gray-4">
+                <div className="space-y-2">
+                  <Label htmlFor="modelsEndpoint" className="text-xs text-gray-10">
+                    模型列表地址
+                  </Label>
+                  <Input
+                    id="modelsEndpoint"
+                    placeholder="/v1/models"
+                    value={formData.modelsEndpoint}
+                    onChange={(e) =>
+                      setFormData({ ...formData, modelsEndpoint: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="chatEndpoint" className="text-xs text-gray-10">
+                    Chat API 地址
+                  </Label>
+                  <Input
+                    id="chatEndpoint"
+                    placeholder="/v1/chat/completions"
+                    value={formData.chatEndpoint}
+                    onChange={(e) =>
+                      setFormData({ ...formData, chatEndpoint: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </details>
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>

@@ -1,14 +1,15 @@
 import pLimit from "p-limit"
 
-async function testModel(apiBase, apiKey, model, timeout) {
+async function testModel(apiBase, apiKey, model, timeout, chatEndpoint = "/v1/chat/completions") {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeout)
 
   try {
     const baseUrl = apiBase.replace(/\/$/, "")
+    const endpoint = chatEndpoint.startsWith("/") ? chatEndpoint : `/${chatEndpoint}`
     const start = Date.now()
 
-    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -53,7 +54,7 @@ async function testModel(apiBase, apiKey, model, timeout) {
 
 export async function POST(request) {
   try {
-    const { apiBase, apiKey, models, timeout = 20000, concurrency = 50 } =
+    const { apiBase, apiKey, models, timeout = 20000, concurrency = 50, chatEndpoint = "/v1/chat/completions" } =
       await request.json()
 
     if (!apiBase || !apiKey || !models?.length) {
@@ -67,7 +68,7 @@ export async function POST(request) {
 
     const results = await Promise.allSettled(
       models.map((model) =>
-        limit(() => testModel(apiBase, apiKey, model, timeout))
+        limit(() => testModel(apiBase, apiKey, model, timeout, chatEndpoint))
       )
     )
 

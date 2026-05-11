@@ -1,6 +1,6 @@
 export async function POST(request) {
   try {
-    const { apiBase, apiKey } = await request.json()
+    const { apiBase, apiKey, modelsEndpoint = "/v1/models" } = await request.json()
 
     if (!apiBase || !apiKey) {
       return Response.json(
@@ -10,7 +10,8 @@ export async function POST(request) {
     }
 
     const baseUrl = apiBase.replace(/\/$/, "")
-    const response = await fetch(`${baseUrl}/v1/models`, {
+    const endpoint = modelsEndpoint.startsWith("/") ? modelsEndpoint : `/${modelsEndpoint}`
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
