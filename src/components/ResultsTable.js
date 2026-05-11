@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import {
   Card,
   CardContent,
@@ -18,12 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
+import { ArrowUpDown, ArrowUp, ArrowDown, Search } from "lucide-react"
 
 export default function ResultsTable({ results, siteName }) {
   const [sortField, setSortField] = useState("latency")
   const [sortDir, setSortDir] = useState("asc")
   const [filter, setFilter] = useState("all")
+  const [search, setSearch] = useState("")
 
   const sortedResults = useMemo(() => {
     let filtered = [...results]
@@ -32,6 +34,11 @@ export default function ResultsTable({ results, siteName }) {
       filtered = filtered.filter((r) => r.success)
     } else if (filter === "failed") {
       filtered = filtered.filter((r) => !r.success)
+    }
+
+    if (search) {
+      const q = search.toLowerCase()
+      filtered = filtered.filter((r) => r.model.toLowerCase().includes(q))
     }
 
     filtered.sort((a, b) => {
@@ -59,7 +66,7 @@ export default function ResultsTable({ results, siteName }) {
     })
 
     return filtered
-  }, [results, sortField, sortDir, filter])
+  }, [results, sortField, sortDir, filter, search])
 
   function toggleSort(field) {
     if (sortField === field) {
@@ -120,7 +127,16 @@ export default function ResultsTable({ results, siteName }) {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-8" />
+          <Input
+            placeholder="搜索模型..."
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         {/* Desktop Table */}
         <div className="hidden md:block">
           <Table>
