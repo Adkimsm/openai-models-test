@@ -14,6 +14,7 @@ export async function POST(request) {
     const response = await fetch(`${baseUrl}${endpoint}`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
+        "User-Agent": "opencode/1.14.48",
       },
     })
 

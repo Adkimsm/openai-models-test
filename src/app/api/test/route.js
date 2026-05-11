@@ -14,6 +14,7 @@ async function testModel(apiBase, apiKey, model, timeout, chatEndpoint = "/v1/ch
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
+        "User-Agent": "opencode/1.14.48",
       },
       body: JSON.stringify({
         model,
