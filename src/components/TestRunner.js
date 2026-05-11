@@ -79,7 +79,7 @@ export default function TestRunner({
       </CardHeader>
       <CardContent className="space-y-4">
         {showSettings && (
-          <div className="grid grid-cols-2 gap-4 p-3 bg-muted rounded-lg">
+          <div className="grid grid-cols-2 gap-4 p-3 bg-gray-2 rounded-lg">
             <div className="space-y-2">
               <Label htmlFor="concurrency" className="text-xs">
                 并发数
@@ -98,7 +98,7 @@ export default function TestRunner({
                   {[10, 50, 100].map((v) => (
                     <Button
                       key={v}
-                      variant={concurrency === v ? "default" : "outline"}
+                      variant={concurrency === v ? "primary" : "secondary"}
                       size="sm"
                       className="h-8 px-2 text-xs"
                       onClick={() => setConcurrency(v)}
@@ -129,7 +129,7 @@ export default function TestRunner({
                   {[5, 20, 60].map((v) => (
                     <Button
                       key={v}
-                      variant={timeout === v * 1000 ? "default" : "outline"}
+                      variant={timeout === v * 1000 ? "primary" : "secondary"}
                       size="sm"
                       className="h-8 px-2 text-xs"
                       onClick={() => setTimeout_(v * 1000)}
@@ -146,13 +146,13 @@ export default function TestRunner({
         {testing && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">进度</span>
-              <span>
+              <span className="text-gray-9">进度</span>
+              <span className="text-gray-12">
                 {progress.completed} / {progress.total}
               </span>
             </div>
             <Progress value={progressPercent} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-gray-9">
               <span>
                 成功: {progress.success} | 失败: {progress.failed}
               </span>
@@ -164,7 +164,7 @@ export default function TestRunner({
         <div className="flex gap-2">
           {testing ? (
             <Button
-              variant="destructive"
+              variant="error"
               className="flex-1"
               onClick={onCancel}
             >

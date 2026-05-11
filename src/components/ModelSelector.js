@@ -128,18 +128,18 @@ export default function ModelSelector({
       </CardHeader>
       <CardContent className="space-y-3">
         {!selectedSite ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-sm text-gray-9 text-center py-4">
             请先在左侧选择一个站点
           </p>
         ) : models.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-sm text-gray-9 text-center py-4">
             {loading ? "正在获取模型列表..." : "点击上方按钮获取模型列表"}
           </p>
         ) : (
           <>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-8" />
                 <Input
                   placeholder="搜索模型..."
                   className="pl-8"
@@ -147,7 +147,7 @@ export default function ModelSelector({
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="sm" onClick={toggleAll}>
+              <Button variant="secondary" size="sm" onClick={toggleAll}>
                 {allDisabled ? (
                   <CheckSquare className="h-4 w-4 mr-1" />
                 ) : (
@@ -157,7 +157,7 @@ export default function ModelSelector({
               </Button>
             </div>
 
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-gray-9">
               已启用: {models.length - siteDisabled.length} / {models.length}
             </div>
 
@@ -167,12 +167,12 @@ export default function ModelSelector({
                 return (
                   <div
                     key={model}
-                    className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-muted"
+                    className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-2"
                   >
                     <Label
                       htmlFor={`model-${model}`}
                       className={`text-sm cursor-pointer flex-1 truncate ${
-                        isDisabled ? "text-muted-foreground line-through" : ""
+                        isDisabled ? "text-gray-8 line-through" : "text-gray-12"
                       }`}
                     >
                       {model}

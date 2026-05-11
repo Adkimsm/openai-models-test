@@ -127,11 +127,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
+    <div className="min-h-screen bg-gray-1">
+      <header className="border-b border-gray-4">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold">AI 模型可用性测试</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-heading-24 font-bold text-gray-12">AI 模型可用性测试</h1>
+          <p className="text-sm text-gray-9 mt-1">
             测试 OpenAI 兼容 API 的模型可用性和响应速度
           </p>
         </div>

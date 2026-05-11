@@ -52,7 +52,7 @@ export default function ExportButton({ results, siteName }) {
 
   return (
     <Button
-      variant="outline"
+      variant="secondary"
       onClick={handleExport}
       disabled={results.length === 0}
     >

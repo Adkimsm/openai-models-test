@@ -106,28 +106,28 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
         </CardHeader>
         <CardContent className="space-y-2">
           {sites.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
+            <p className="text-sm text-gray-9 text-center py-4">
               暂无站点，请添加
             </p>
           ) : (
             sites.map((site) => (
               <div
                 key={site.id}
-                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                className={`p-3 rounded-lg border border-gray-4 cursor-pointer transition-colors ${
                   selectedSite?.id === site.id
-                    ? "border-primary bg-primary/5"
-                    : "hover:bg-muted"
+                    ? "border-gray-12 bg-gray-12/5"
+                    : "hover:bg-gray-2"
                 }`}
                 onClick={() => onSelectSite(site)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{site.name}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                    <div className="font-medium text-gray-12 truncate">{site.name}</div>
+                    <div className="text-xs text-gray-9 flex items-center gap-1 mt-1">
                       <Globe className="h-3 w-3 shrink-0" />
                       <span className="truncate">{site.apiBase}</span>
                     </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <div className="text-xs text-gray-9 flex items-center gap-1 mt-0.5">
                       <Key className="h-3 w-3 shrink-0" />
                       <span className="truncate">
                         {"•".repeat(8)}
@@ -150,7 +150,7 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-destructive"
+                      className="h-8 w-8 text-red-11"
                       onClick={(e) => {
                         e.stopPropagation()
                         handleDelete(site.id)
@@ -211,7 +211,7 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button variant="secondary" onClick={() => setDialogOpen(false)}>
               取消
             </Button>
             <Button onClick={handleSave}>保存</Button>

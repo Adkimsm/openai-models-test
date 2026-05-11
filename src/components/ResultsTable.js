@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ArrowUpDown, ArrowUp, ArrowDown, Filter } from "lucide-react"
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 
 export default function ResultsTable({ results, siteName }) {
   const [sortField, setSortField] = useState("latency")
@@ -92,24 +92,22 @@ export default function ResultsTable({ results, siteName }) {
           </div>
           <div className="flex gap-2">
             <Button
-              variant={filter === "all" ? "default" : "outline"}
+              variant={filter === "all" ? "primary" : "secondary"}
               size="sm"
               onClick={() => setFilter("all")}
             >
               全部 ({results.length})
             </Button>
             <Button
-              variant={filter === "success" ? "default" : "outline"}
+              variant={filter === "success" ? "primary" : "secondary"}
               size="sm"
-              className="text-green-600"
               onClick={() => setFilter("success")}
             >
               成功 ({successCount})
             </Button>
             <Button
-              variant={filter === "failed" ? "default" : "outline"}
+              variant={filter === "failed" ? "primary" : "secondary"}
               size="sm"
-              className="text-red-600"
               onClick={() => setFilter("failed")}
             >
               失败 ({failCount})
@@ -150,7 +148,7 @@ export default function ResultsTable({ results, siteName }) {
             <TableBody>
               {sortedResults.map((result) => (
                 <TableRow key={result.model}>
-                  <TableCell className="font-mono text-sm">
+                  <TableCell className="font-mono text-sm text-gray-12">
                     {result.model}
                   </TableCell>
                   <TableCell>
@@ -160,14 +158,14 @@ export default function ResultsTable({ results, siteName }) {
                       {result.success ? "成功" : "失败"}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-gray-12">
                     {result.success ? (
                       <span className="font-mono">{result.latency}</span>
                     ) : (
-                      <span className="text-muted-foreground">-</span>
+                      <span className="text-gray-8">-</span>
                     )}
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+                  <TableCell className="max-w-[200px] truncate text-sm text-gray-9">
                     {result.success
                       ? result.response
                       : result.error}
@@ -183,10 +181,10 @@ export default function ResultsTable({ results, siteName }) {
           {sortedResults.map((result) => (
             <div
               key={result.model}
-              className="p-3 rounded-lg border space-y-1"
+              className="p-3 rounded-lg border border-gray-4 space-y-1"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-sm truncate flex-1">
+                <span className="font-mono text-sm text-gray-12 truncate flex-1">
                   {result.model}
                 </span>
                 <Badge variant={result.success ? "default" : "destructive"}>
@@ -194,11 +192,11 @@ export default function ResultsTable({ results, siteName }) {
                 </Badge>
               </div>
               {result.success && (
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-gray-9">
                   延迟: <span className="font-mono">{result.latency}ms</span>
                 </div>
               )}
-              <div className="text-xs text-muted-foreground truncate">
+              <div className="text-xs text-gray-9 truncate">
                 {result.success ? result.response : result.error}
               </div>
             </div>
