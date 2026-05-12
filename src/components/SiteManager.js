@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Plus, Pencil, Trash2, Globe, Key, Settings2 } from "lucide-react"
+import { Plus, Pencil, Trash2, Globe, Key, Settings2, Eye, EyeOff } from "lucide-react"
 import { getSites, saveSite, deleteSite } from "@/lib/db"
 
 export default function SiteManager({ selectedSite, onSelectSite }) {
@@ -27,6 +27,7 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingSite, setEditingSite] = useState(null)
   const [formData, setFormData] = useState({ name: "", apiBase: "", apiKey: "", modelsEndpoint: "/v1/models", chatEndpoint: "/v1/chat/completions" })
+  const [apiKeyVisible, setApiKeyVisible] = useState(false)
 
   useEffect(() => {
     getSites().then((saved) => {
@@ -42,6 +43,7 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
   function handleAdd() {
     setEditingSite(null)
     setFormData({ name: "", apiBase: "", apiKey: "", modelsEndpoint: "/v1/models", chatEndpoint: "/v1/chat/completions" })
+    setApiKeyVisible(false)
     setDialogOpen(true)
   }
 
@@ -54,6 +56,7 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
       modelsEndpoint: site.modelsEndpoint || "/v1/models",
       chatEndpoint: site.chatEndpoint || "/v1/chat/completions",
     })
+    setApiKeyVisible(false)
     setDialogOpen(true)
   }
 
@@ -199,15 +202,29 @@ export default function SiteManager({ selectedSite, onSelectSite }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="apiKey">API Key</Label>
-              <Input
-                id="apiKey"
-                type="password"
-                placeholder="sk-..."
-                value={formData.apiKey}
-                onChange={(e) =>
-                  setFormData({ ...formData, apiKey: e.target.value })
-                }
-              />
+              <div className="relative">
+                <Input
+                  id="apiKey"
+                  type={apiKeyVisible ? "text" : "password"}
+                  placeholder="sk-..."
+                  value={formData.apiKey}
+                  onChange={(e) =>
+                    setFormData({ ...formData, apiKey: e.target.value })
+                  }
+                  className="pr-9"
+                />
+                <button
+                  type="button"
+                  onClick={() => setApiKeyVisible(!apiKeyVisible)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-9 hover:text-gray-12 transition-colors"
+                >
+                  {apiKeyVisible ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <details className="group">
               <summary className="flex items-center gap-1.5 text-xs text-gray-9 cursor-pointer select-none hover:text-gray-12 transition-colors">
