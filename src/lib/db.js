@@ -1,7 +1,7 @@
 import { openDB as idbOpen } from "idb"
 
 const DB_NAME = "ai-test-db"
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise = null
 
@@ -23,6 +23,10 @@ function getDB() {
         }
         if (!db.objectStoreNames.contains("results")) {
           db.createObjectStore("results", { keyPath: "apiBase" })
+        }
+        if (!db.objectStoreNames.contains("conversations")) {
+          const store = db.createObjectStore("conversations", { keyPath: "id" })
+          store.createIndex("updatedAt", "updatedAt")
         }
       },
     })
@@ -108,4 +112,27 @@ export async function getResults(apiBase) {
 export async function saveResults(apiBase, results) {
   const db = await getDB()
   return db.put("results", { apiBase, results })
+}
+
+// ── Conversations ──
+
+export async function getConversations() {
+  const db = await getDB()
+  const all = await db.getAll("conversations")
+  return all.sort((a, b) => b.updatedAt - a.updatedAt)
+}
+
+export async function getConversation(id) {
+  const db = await getDB()
+  return db.get("conversations", id)
+}
+
+export async function saveConversation(conversation) {
+  const db = await getDB()
+  return db.put("conversations", conversation)
+}
+
+export async function deleteConversation(id) {
+  const db = await getDB()
+  return db.delete("conversations", id)
 }
