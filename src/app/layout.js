@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <header className="border-b border-gray-4 bg-gray-1 shrink-0 z-50">
+        <header className="border-b border-gray-4 bg-gray-1 shrink-0 z-50 sticky top-0">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between">
             <Nav />
             <div className="flex items-center gap-0.5">
