@@ -6,6 +6,8 @@ import ConversationList from "@/components/ConversationList"
 import ModelPicker from "@/components/ModelPicker"
 import ChatMessage from "@/components/ChatMessage"
 import ChatInput from "@/components/ChatInput"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Menu } from "lucide-react"
 import {
   getConversations,
   getConversation,
@@ -16,6 +18,54 @@ import {
   getSite,
 } from "@/lib/db"
 
+function SidebarContent({
+  selectedSite,
+  setSelectedSite,
+  setSelectedModel,
+  selectedModel,
+  conversations,
+  activeId,
+  handleSelectConversation,
+  handleDeleteConversation,
+  handleNewConversation,
+}) {
+  return (
+    <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-hidden">
+        <SiteManager
+          selectedSite={selectedSite}
+          onSelectSite={(site) => {
+            setSelectedSite(site)
+            setSelectedModel("")
+            setSetting("selectedSiteId", site?.id || null)
+            setSetting("chatModel", null)
+          }}
+        />
+      </div>
+      <div className="px-3 py-2 border-t border-gray-4 shrink-0">
+        <div className="text-xs text-gray-9 mb-1.5">对话模型</div>
+        <ModelPicker
+          selectedSite={selectedSite}
+          selectedModel={selectedModel}
+          onSelect={(model) => {
+            setSelectedModel(model)
+            setSetting("chatModel", model)
+          }}
+        />
+      </div>
+      <div className="border-t border-gray-4 h-[220px] shrink-0">
+        <ConversationList
+          conversations={conversations}
+          activeId={activeId}
+          onSelect={handleSelectConversation}
+          onDelete={handleDeleteConversation}
+          onNew={handleNewConversation}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function ChatPage() {
   const [selectedSite, setSelectedSite] = useState(null)
   const [selectedModel, setSelectedModel] = useState("")
@@ -24,6 +74,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([])
   const [streaming, setStreaming] = useState(false)
   const [isDark, setIsDark] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const abortRef = useRef(null)
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
@@ -108,10 +159,12 @@ export default function ChatPage() {
     setConversations(updated)
     setActiveId(id)
     setMessages([])
+    setSidebarOpen(false)
   }
 
   async function handleSelectConversation(id) {
     setActiveId(id)
+    setSidebarOpen(false)
   }
 
   async function handleDeleteConversation(id) {
@@ -268,43 +321,58 @@ export default function ChatPage() {
 
   return (
     <div className="flex-1 flex flex-col bg-gray-1 overflow-hidden">
+      {/* 移动端顶部工具栏 */}
+      <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-gray-4 shrink-0">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-1.5 rounded-lg hover:bg-gray-3 text-gray-11 hover:text-gray-12 transition-colors"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="text-sm font-medium text-gray-12 truncate">
+          {activeId
+            ? conversations.find((c) => c.id === activeId)?.title || "新对话"
+            : "AI 对话"}
+        </div>
+      </div>
+
       <div className="flex-1 flex overflow-hidden">
-        {/* 左侧边栏 */}
-        <div className="w-64 border-r border-gray-4 flex flex-col shrink-0">
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-hidden">
-              <SiteManager
+        {/* 桌面端左侧边栏 */}
+        <div className="hidden md:flex w-64 border-r border-gray-4 flex-col shrink-0">
+          <SidebarContent
+            selectedSite={selectedSite}
+            setSelectedSite={setSelectedSite}
+            setSelectedModel={setSelectedModel}
+            selectedModel={selectedModel}
+            conversations={conversations}
+            activeId={activeId}
+            handleSelectConversation={handleSelectConversation}
+            handleDeleteConversation={handleDeleteConversation}
+            handleNewConversation={handleNewConversation}
+          />
+        </div>
+
+        {/* 移动端侧边栏 Sheet */}
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <SheetContent side="left" className="p-0 w-72">
+            <SheetHeader className="px-4 py-3">
+              <SheetTitle>菜单</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <SidebarContent
                 selectedSite={selectedSite}
-                onSelectSite={(site) => {
-                  setSelectedSite(site)
-                  setSelectedModel("")
-                  setSetting("selectedSiteId", site?.id || null)
-                  setSetting("chatModel", null)
-                }}
-              />
-            </div>
-            <div className="px-3 py-2 border-t border-gray-4 shrink-0">
-              <div className="text-xs text-gray-9 mb-1.5">对话模型</div>
-              <ModelPicker
-                selectedSite={selectedSite}
+                setSelectedSite={setSelectedSite}
+                setSelectedModel={setSelectedModel}
                 selectedModel={selectedModel}
-                onSelect={(model) => {
-                  setSelectedModel(model)
-                  setSetting("chatModel", model)
-                }}
-              />
-            </div>
-            <div className="border-t border-gray-4 h-[220px] shrink-0">
-              <ConversationList
                 conversations={conversations}
                 activeId={activeId}
-                onSelect={handleSelectConversation}
-                onDelete={handleDeleteConversation}
-                onNew={handleNewConversation}
+                handleSelectConversation={handleSelectConversation}
+                handleDeleteConversation={handleDeleteConversation}
+                handleNewConversation={handleNewConversation}
               />
             </div>
-          </div>
-        </div>
+          </SheetContent>
+        </Sheet>
 
         {/* 右侧聊天区域 */}
         <div className="flex-1 flex flex-col min-w-0">
