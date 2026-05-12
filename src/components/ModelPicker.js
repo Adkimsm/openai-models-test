@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { ChevronDown, Check } from "lucide-react"
 import { getModels } from "@/lib/db"
 
-export default function ModelPicker({ selectedSite, selectedModel, onSelect }) {
+export default function ModelPicker({ selectedSite, selectedModel, onSelect, results = [] }) {
   const [models, setModels] = useState([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
@@ -49,9 +49,43 @@ export default function ModelPicker({ selectedSite, selectedModel, onSelect }) {
     }
   }
 
-  const filtered = models.filter((m) =>
+  const resultMap = {}
+  for (const r of results) {
+    resultMap[r.model] = r
+  }
+
+  const searched = models.filter((m) =>
     m.toLowerCase().includes(search.toLowerCase())
   )
+
+  const available = []
+  const failed = []
+  const untested = []
+  for (const m of searched) {
+    const r = resultMap[m]
+    if (!r) {
+      untested.push(m)
+    } else if (r.success) {
+      available.push(m)
+    } else {
+      failed.push(m)
+    }
+  }
+  available.sort((a, b) => (resultMap[a].latency || 0) - (resultMap[b].latency || 0))
+
+  const sorted = [...available, ...failed, ...untested]
+
+  function StatusDot({ model }) {
+    const r = resultMap[model]
+    if (!r) return null
+    return (
+      <span
+        className={`h-2 w-2 rounded-full shrink-0 ${r.success ? "bg-green-9" : "bg-red-9"}`}
+      />
+    )
+  }
+
+  const selectedResult = selectedModel ? resultMap[selectedModel] : null
 
   return (
     <div className="relative">
@@ -65,6 +99,11 @@ export default function ModelPicker({ selectedSite, selectedModel, onSelect }) {
         <span className="truncate">
           {loading ? "加载中..." : selectedModel || "选择模型"}
         </span>
+        {selectedResult && (
+          <span
+            className={`h-2 w-2 rounded-full shrink-0 ml-1 ${selectedResult.success ? "bg-green-9" : "bg-red-9"}`}
+          />
+        )}
         <ChevronDown className="h-3.5 w-3.5 ml-1 shrink-0" />
       </Button>
 
@@ -85,12 +124,12 @@ export default function ModelPicker({ selectedSite, selectedModel, onSelect }) {
               />
             </div>
             <div className="max-h-[240px] overflow-y-auto">
-              {filtered.length === 0 ? (
+              {sorted.length === 0 ? (
                 <div className="p-3 text-sm text-gray-9 text-center">
                   {models.length === 0 ? "暂无模型，请先获取" : "无匹配结果"}
                 </div>
               ) : (
-                filtered.map((model) => (
+                sorted.map((model) => (
                   <button
                     key={model}
                     className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-3 transition-colors ${
@@ -102,6 +141,7 @@ export default function ModelPicker({ selectedSite, selectedModel, onSelect }) {
                       setSearch("")
                     }}
                   >
+                    <StatusDot model={model} />
                     <span className="truncate flex-1">{model}</span>
                     {selectedModel === model && (
                       <Check className="h-3.5 w-3.5 shrink-0 text-blue-11" />

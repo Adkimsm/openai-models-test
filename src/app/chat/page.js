@@ -16,6 +16,7 @@ import {
   getSetting,
   setSetting,
   getSite,
+  getResults,
 } from "@/lib/db"
 
 function SidebarContent({
@@ -28,6 +29,7 @@ function SidebarContent({
   handleSelectConversation,
   handleDeleteConversation,
   handleNewConversation,
+  testResults,
 }) {
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
@@ -47,6 +49,7 @@ function SidebarContent({
         <ModelPicker
           selectedSite={selectedSite}
           selectedModel={selectedModel}
+          results={testResults}
           onSelect={(model) => {
             setSelectedModel(model)
             setSetting("chatModel", model)
@@ -75,6 +78,7 @@ export default function ChatPage() {
   const [streaming, setStreaming] = useState(false)
   const [isDark, setIsDark] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [testResults, setTestResults] = useState([])
   const abortRef = useRef(null)
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
@@ -104,6 +108,14 @@ export default function ChatPage() {
       }
     )
   }, [])
+
+  useEffect(() => {
+    if (!selectedSite) {
+      setTestResults([])
+      return
+    }
+    getResults(selectedSite.apiBase).then(setTestResults)
+  }, [selectedSite])
 
   useEffect(() => {
     if (!activeId) {
@@ -349,6 +361,7 @@ export default function ChatPage() {
             handleSelectConversation={handleSelectConversation}
             handleDeleteConversation={handleDeleteConversation}
             handleNewConversation={handleNewConversation}
+            testResults={testResults}
           />
         </div>
 
@@ -369,6 +382,7 @@ export default function ChatPage() {
                 handleSelectConversation={handleSelectConversation}
                 handleDeleteConversation={handleDeleteConversation}
                 handleNewConversation={handleNewConversation}
+                testResults={testResults}
               />
             </div>
           </SheetContent>
