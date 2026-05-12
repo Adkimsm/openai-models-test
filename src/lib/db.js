@@ -5,7 +5,7 @@ const DB_VERSION = 2
 
 let dbPromise = null
 
-function getDB() {
+export function getDB() {
   if (!dbPromise) {
     dbPromise = idbOpen(DB_NAME, DB_VERSION, {
       upgrade(db) {
@@ -29,6 +29,9 @@ function getDB() {
           store.createIndex("updatedAt", "updatedAt")
         }
       },
+    }).catch((err) => {
+      dbPromise = null
+      throw err
     })
   }
   return dbPromise

@@ -1,7 +1,4 @@
-import { openDB as idbOpen } from "idb"
-
-const DB_NAME = "ai-test-db"
-const DB_VERSION = 2
+import { getDB } from "./db"
 
 const STORES = [
   "sites",
@@ -13,12 +10,11 @@ const STORES = [
 ]
 
 async function readAllStores() {
-  const db = await idbOpen(DB_NAME, DB_VERSION)
+  const db = await getDB()
   const data = {}
   for (const store of STORES) {
     data[store] = await db.getAll(store)
   }
-  db.close()
   return data
 }
 
@@ -110,7 +106,7 @@ export function getImportPreview(data) {
 
 export async function importData(data) {
   const d = data.data || {}
-  const db = await idbOpen(DB_NAME, DB_VERSION)
+  const db = await getDB()
   const stats = {}
 
   const keyMap = {
@@ -137,6 +133,5 @@ export async function importData(data) {
     stats[store] = { added, updated }
   }
 
-  db.close()
   return stats
 }
