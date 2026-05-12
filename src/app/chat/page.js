@@ -11,6 +11,9 @@ import {
   getConversation,
   saveConversation,
   deleteConversation,
+  getSetting,
+  setSetting,
+  getSite,
 } from "@/lib/db"
 
 export default function ChatPage() {
@@ -37,6 +40,18 @@ export default function ChatPage() {
 
   useEffect(() => {
     getConversations().then(setConversations)
+  }, [])
+
+  useEffect(() => {
+    Promise.all([getSetting("selectedSiteId"), getSetting("chatModel")]).then(
+      async ([siteId, model]) => {
+        if (siteId) {
+          const site = await getSite(siteId)
+          if (site) setSelectedSite(site)
+        }
+        if (model) setSelectedModel(model)
+      }
+    )
   }, [])
 
   useEffect(() => {
@@ -263,10 +278,23 @@ export default function ChatPage() {
                 onSelectSite={(site) => {
                   setSelectedSite(site)
                   setSelectedModel("")
+                  setSetting("selectedSiteId", site?.id || null)
+                  setSetting("chatModel", null)
                 }}
               />
             </div>
-            <div className="border-t border-gray-4 h-[250px] shrink-0">
+            <div className="px-3 py-2 border-t border-gray-4 shrink-0">
+              <div className="text-xs text-gray-9 mb-1.5">对话模型</div>
+              <ModelPicker
+                selectedSite={selectedSite}
+                selectedModel={selectedModel}
+                onSelect={(model) => {
+                  setSelectedModel(model)
+                  setSetting("chatModel", model)
+                }}
+              />
+            </div>
+            <div className="border-t border-gray-4 h-[220px] shrink-0">
               <ConversationList
                 conversations={conversations}
                 activeId={activeId}

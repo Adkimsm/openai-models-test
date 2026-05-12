@@ -7,7 +7,7 @@ import TestRunner from "@/components/TestRunner"
 import ResultsTable from "@/components/ResultsTable"
 import ExportButton from "@/components/ExportButton"
 import Footer from "@/components/Footer"
-import { getResults, saveResults, getModels, saveModels } from "@/lib/db"
+import { getResults, saveResults, getModels, saveModels, getSetting, setSetting, getSite } from "@/lib/db"
 
 export default function Home() {
   const [selectedSite, setSelectedSite] = useState(null)
@@ -23,6 +23,15 @@ export default function Home() {
     failed: 0,
   })
   const abortRef = useRef(false)
+
+  useEffect(() => {
+    getSetting("selectedSiteId").then(async (siteId) => {
+      if (siteId) {
+        const site = await getSite(siteId)
+        if (site) setSelectedSite(site)
+      }
+    })
+  }, [])
 
   useEffect(() => {
     if (!selectedSite) return
@@ -166,6 +175,7 @@ export default function Home() {
                 setModels([])
                 setEnabledModels([])
                 setResults([])
+                setSetting("selectedSiteId", site?.id || null)
               }}
             />
           </div>
