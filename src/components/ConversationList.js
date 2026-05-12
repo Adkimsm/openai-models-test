@@ -58,7 +58,7 @@ export default function ConversationList({
                   e.stopPropagation()
                   onDelete(conv.id)
                 }}
-                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-4 text-gray-9 hover:text-red-11 transition-all"
+                className="p-1 rounded hover:bg-gray-4 text-gray-9 hover:text-red-11 transition-colors md:opacity-0 md:group-hover:opacity-100"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
