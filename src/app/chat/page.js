@@ -82,6 +82,7 @@ export default function ChatPage() {
   const abortRef = useRef(null)
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
+  const skipNextLoadRef = useRef(false)
 
   useEffect(() => {
     const dark = document.documentElement.classList.contains("dark")
@@ -120,6 +121,10 @@ export default function ChatPage() {
   useEffect(() => {
     if (!activeId) {
       setMessages([])
+      return
+    }
+    if (skipNextLoadRef.current) {
+      skipNextLoadRef.current = false
       return
     }
     getConversation(activeId).then((conv) => {
@@ -209,6 +214,7 @@ export default function ChatPage() {
         updatedAt: Date.now(),
       }
       await saveConversation(conv)
+      skipNextLoadRef.current = true
       setActiveId(convId)
     }
 
