@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
-import { Copy, Check, User, Bot, X } from "lucide-react"
+import { Copy, Check, User, Bot, X, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -87,6 +87,42 @@ function ImagePreview({ src, alt }) {
   )
 }
 
+function extractThinkBlocks(content) {
+  if (typeof content !== "string") return { thinks: [], cleanContent: content }
+  
+  const thinkRegex = /<think>([\s\S]*?)<\/think>/g
+  const thinks = []
+  let match
+
+  while ((match = thinkRegex.exec(content)) !== null) {
+    thinks.push(match[1].trim())
+  }
+
+  const cleanContent = content.replace(thinkRegex, "").trim()
+  return { thinks, cleanContent }
+}
+
+function ThinkBlock({ content }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="my-2 border border-gray-4 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full px-3 py-2 text-left text-xs text-gray-11 bg-gray-4 hover:bg-gray-5 flex items-center gap-2"
+      >
+        <ChevronRight className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`} />
+        思考过程 ({content.length}字)
+      </button>
+      {expanded && (
+        <div className="px-3 py-2 text-sm text-gray-11 bg-gray-2 border-t border-gray-4 whitespace-pre-wrap">
+          {content}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function renderContent(content, isDark) {
   if (typeof content === "string") {
     return content
@@ -116,6 +152,7 @@ export default function ChatMessage({ message, isDark }) {
   const isUser = message.role === "user"
   const images = extractImages(message.content)
   const textContent = renderContent(message.content, isDark)
+  const { thinks, cleanContent } = extractThinkBlocks(textContent)
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -142,6 +179,13 @@ export default function ChatMessage({ message, isDark }) {
 
         {textContent && (
           <div className={`prose prose-sm max-w-none ${isUser ? "prose-invert" : ""}`}>
+            {!isUser && thinks.length > 0 && (
+              <div className="not-prose">
+                {thinks.map((think, i) => (
+                  <ThinkBlock key={i} content={think} />
+                ))}
+              </div>
+            )}
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -163,7 +207,7 @@ export default function ChatMessage({ message, isDark }) {
                 img: ({ src, alt }) => <ImagePreview src={src} alt={alt} />,
               }}
             >
-              {textContent}
+              {cleanContent}
             </ReactMarkdown>
           </div>
         )}
