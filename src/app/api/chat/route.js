@@ -41,6 +41,17 @@ export async function POST(request) {
       async start(controller) {
         const reader = apiResponse.body.getReader()
         let buffer = ""
+        let reasoningAccumulated = ""
+        let reasoningSent = false
+
+        function flushReasoning() {
+          if (!reasoningSent && reasoningAccumulated) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ content: `<think>${reasoningAccumulated}</think>` })}\n\n`)
+            )
+            reasoningSent = true
+          }
+        }
 
         try {
           while (true) {
@@ -57,6 +68,7 @@ export async function POST(request) {
 
               const data = trimmed.slice(6)
               if (data === "[DONE]") {
+                flushReasoning()
                 controller.enqueue(encoder.encode("data: [DONE]\n\n"))
                 continue
               }
@@ -68,12 +80,11 @@ export async function POST(request) {
                 const content = delta?.content
 
                 if (reasoningContent) {
-                  controller.enqueue(
-                    encoder.encode(`data: ${JSON.stringify({ content: `<think>${reasoningContent}</think>` })}\n\n`)
-                  )
+                  reasoningAccumulated += reasoningContent
                 }
 
                 if (content) {
+                  flushReasoning()
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
                   )
