@@ -1,45 +1,89 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Sun, Moon } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Sun, Moon, Monitor } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getSetting, setSetting } from "@/lib/db"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu"
+
+const STORAGE_KEY = "theme"
+
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+}
+
+function applyTheme(mode) {
+  const dark = mode === "dark" || (mode === "system" && getSystemTheme() === "dark")
+  document.documentElement.classList.toggle("dark", dark)
+}
 
 export default function ThemeSwitcher() {
-  const [theme, setTheme] = useState("light")
+  const [theme, setTheme] = useState("system")
+  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    getSetting("theme").then((saved) => {
-      if (saved) {
-        setTheme(saved)
-        document.documentElement.classList.toggle("dark", saved === "dark")
-      } else {
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-        setTheme(prefersDark ? "dark" : "light")
-        document.documentElement.classList.toggle("dark", prefersDark)
-      }
-    })
+  const handleChange = useCallback((mode) => {
+    setTheme(mode)
+    if (mode === "system") {
+      localStorage.removeItem(STORAGE_KEY)
+    } else {
+      localStorage.setItem(STORAGE_KEY, mode)
+    }
+    applyTheme(mode)
   }, [])
 
-  function toggle() {
-    const next = theme === "dark" ? "light" : "dark"
-    setTheme(next)
-    setSetting("theme", next)
-    document.documentElement.classList.toggle("dark", next === "dark")
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    const initial = saved === "light" || saved === "dark" ? saved : "system"
+    setTheme(initial)
+    applyTheme(initial)
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (theme !== "system") return
+    const mq = window.matchMedia("(prefers-color-scheme: dark)")
+    const listener = () => applyTheme("system")
+    mq.addEventListener("change", listener)
+    return () => mq.removeEventListener("change", listener)
+  }, [theme])
+
+  const icons = {
+    system: <Monitor className="h-4 w-4" />,
+    light: <Sun className="h-4 w-4" />,
+    dark: <Moon className="h-4 w-4" />,
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggle}
-      aria-label={theme === "dark" ? "切换到浅色模式" : "切换到深色模式"}
-    >
-      {theme === "dark" ? (
-        <Sun className="h-4 w-4" />
-      ) : (
-        <Moon className="h-4 w-4" />
-      )}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={<Button variant="ghost" size="icon" aria-label="切换主题" />}
+      >
+        {mounted ? icons[theme] : <Monitor className="h-4 w-4" />}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup
+          value={theme}
+          onValueChange={handleChange}
+        >
+          <DropdownMenuRadioItem value="system">
+            <Monitor className="h-4 w-4" />
+            跟随系统
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="light">
+            <Sun className="h-4 w-4" />
+            浅色
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark">
+            <Moon className="h-4 w-4" />
+            深色
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

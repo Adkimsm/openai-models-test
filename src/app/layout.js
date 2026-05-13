@@ -26,6 +26,13 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')})()`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <header className="border-b border-gray-4 bg-gray-1 shrink-0 z-50 sticky top-0">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between">
