@@ -88,7 +88,7 @@ function ImagePreview({ src, alt }) {
 }
 
 function extractThinkBlocks(content) {
-  if (typeof content !== "string") return { thinks: [], cleanContent: content }
+  if (typeof content !== "string") return { thinks: [], cleanContent: content, streamingThink: "" }
   
   const thinkRegex = /<think>([\s\S]*?)<\/think>/g
   const thinks = []
@@ -98,11 +98,21 @@ function extractThinkBlocks(content) {
     thinks.push(match[1].trim())
   }
 
-  const cleanContent = content.replace(thinkRegex, "").trim()
-  return { thinks, cleanContent }
+  const withoutComplete = content.replace(thinkRegex, "")
+  const openTagIndex = withoutComplete.indexOf("<think>")
+
+  let streamingThink = ""
+  let cleanContent = withoutComplete.trim()
+
+  if (openTagIndex !== -1) {
+    streamingThink = withoutComplete.slice(openTagIndex + 7).trim()
+    cleanContent = withoutComplete.slice(0, openTagIndex).trim()
+  }
+
+  return { thinks, cleanContent, streamingThink }
 }
 
-function ThinkBlock({ content }) {
+function ThinkBlock({ content, streaming = false }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
@@ -112,11 +122,12 @@ function ThinkBlock({ content }) {
         className="w-full px-3 py-2 text-left text-xs text-gray-11 bg-gray-4 hover:bg-gray-5 flex items-center gap-2"
       >
         <ChevronRight className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`} />
-        思考过程 ({content.length}字)
+        {streaming ? "思考中..." : `思考过程 (${content.length}字)`}
       </button>
       {expanded && (
         <div className="px-3 py-2 text-sm text-gray-11 bg-gray-2 border-t border-gray-4 whitespace-pre-wrap">
           {content}
+          {streaming && <span className="animate-pulse">|</span>}
         </div>
       )}
     </div>
@@ -152,7 +163,7 @@ export default function ChatMessage({ message, isDark }) {
   const isUser = message.role === "user"
   const images = extractImages(message.content)
   const textContent = renderContent(message.content, isDark)
-  const { thinks, cleanContent } = extractThinkBlocks(textContent)
+  const { thinks, cleanContent, streamingThink } = extractThinkBlocks(textContent)
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -184,6 +195,11 @@ export default function ChatMessage({ message, isDark }) {
                 {thinks.map((think, i) => (
                   <ThinkBlock key={i} content={think} />
                 ))}
+              </div>
+            )}
+            {!isUser && streamingThink && (
+              <div className="not-prose">
+                <ThinkBlock content={streamingThink} streaming={true} />
               </div>
             )}
             <ReactMarkdown
