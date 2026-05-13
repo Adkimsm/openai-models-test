@@ -87,7 +87,7 @@ function ImagePreview({ src, alt }) {
   )
 }
 
-function extractThinkBlocks(content) {
+function extractThinkBlocks(content, streaming = false) {
   if (typeof content !== "string") return { thinks: [], cleanContent: content, streamingThink: "" }
   
   const thinkRegex = /<think>([\s\S]*?)<\/think>/g
@@ -97,16 +97,18 @@ function extractThinkBlocks(content) {
   while ((match = thinkRegex.exec(content)) !== null) {
     thinks.push(match[1].trim())
   }
+  thinkRegex.lastIndex = 0
 
   const withoutComplete = content.replace(thinkRegex, "")
-  const openTagIndex = withoutComplete.indexOf("<think>")
-
   let streamingThink = ""
   let cleanContent = withoutComplete.trim()
 
-  if (openTagIndex !== -1) {
-    streamingThink = withoutComplete.slice(openTagIndex + 7).trim()
-    cleanContent = withoutComplete.slice(0, openTagIndex).trim()
+  if (streaming) {
+    const openTagIndex = withoutComplete.indexOf("<think>")
+    if (openTagIndex !== -1) {
+      streamingThink = withoutComplete.slice(openTagIndex + 7).trim()
+      cleanContent = withoutComplete.slice(0, openTagIndex).trim()
+    }
   }
 
   return { thinks, cleanContent, streamingThink }
@@ -163,7 +165,7 @@ export default function ChatMessage({ message, isDark }) {
   const isUser = message.role === "user"
   const images = extractImages(message.content)
   const textContent = renderContent(message.content, isDark)
-  const { thinks, cleanContent, streamingThink } = extractThinkBlocks(textContent)
+  const { thinks, cleanContent, streamingThink } = extractThinkBlocks(textContent, message.streaming)
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
