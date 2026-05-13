@@ -111,7 +111,18 @@ function extractThinkBlocks(content, streaming = false) {
     }
   }
 
-  return { thinks, cleanContent, streamingThink }
+  const dedupedThinks = []
+  for (const t of thinks) {
+    if (dedupedThinks.length === 0 || dedupedThinks[dedupedThinks.length - 1] !== t) {
+      dedupedThinks.push(t)
+    }
+  }
+
+  if (streamingThink && dedupedThinks.length > 0 && dedupedThinks[dedupedThinks.length - 1] === streamingThink) {
+    streamingThink = ""
+  }
+
+  return { thinks: dedupedThinks, cleanContent, streamingThink }
 }
 
 function ThinkBlock({ content, streaming = false }) {

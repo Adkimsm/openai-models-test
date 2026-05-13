@@ -63,7 +63,16 @@ export async function POST(request) {
 
               try {
                 const parsed = JSON.parse(data)
-                const content = parsed.choices?.[0]?.delta?.content
+                const delta = parsed.choices?.[0]?.delta
+                const reasoningContent = delta?.reasoning_content
+                const content = delta?.content
+
+                if (reasoningContent) {
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify({ content: `<think>${reasoningContent}</think>` })}\n\n`)
+                  )
+                }
+
                 if (content) {
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
